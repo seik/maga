@@ -63,7 +63,9 @@ class Maga(asyncio.DatagramProtocol):
                 self.find_node(addr=node)
 
     def run(self, port=6881):
-        coro = self.loop.create_datagram_endpoint(lambda: self, local_addr=("0.0.0.0", port))
+        coro = self.loop.create_datagram_endpoint(
+            lambda: self, local_addr=("0.0.0.0", port)
+        )
         transport, _ = self.loop.run_until_complete(coro)
 
         for signame in ("SIGINT", "SIGTERM"):
@@ -104,7 +106,9 @@ class Maga(asyncio.DatagramProtocol):
             return self.handle_response(msg, addr=addr)
 
         if msg_type == b"q":
-            return asyncio.ensure_future(self.handle_query(msg, addr=addr), loop=self.loop)
+            return asyncio.ensure_future(
+                self.handle_query(msg, addr=addr), loop=self.loop
+            )
 
     def handle_response(self, msg, addr):
         args = msg[b"r"]
@@ -124,7 +128,11 @@ class Maga(asyncio.DatagramProtocol):
                 {
                     "t": msg[b"t"],
                     "y": "r",
-                    "r": {"id": self.fake_node_id(node_id), "nodes": "", "token": token},
+                    "r": {
+                        "id": self.fake_node_id(node_id),
+                        "nodes": "",
+                        "token": token,
+                    },
                 },
                 addr=addr,
             )
@@ -144,12 +152,17 @@ class Maga(asyncio.DatagramProtocol):
         elif query_type == b"find_node":
             tid = msg[b"t"]
             self.send_message(
-                {"t": tid, "y": "r", "r": {"id": self.fake_node_id(node_id), "nodes": ""}},
+                {
+                    "t": tid,
+                    "y": "r",
+                    "r": {"id": self.fake_node_id(node_id), "nodes": ""},
+                },
                 addr=addr,
             )
         elif query_type == b"ping":
             self.send_message(
-                {"t": b"tt", "y": "r", "r": {"id": self.fake_node_id(node_id)}}, addr=addr
+                {"t": b"tt", "y": "r", "r": {"id": self.fake_node_id(node_id)}},
+                addr=addr,
             )
         self.find_node(addr=addr, node_id=node_id)
 
